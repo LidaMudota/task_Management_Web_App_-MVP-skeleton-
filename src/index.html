@@ -12,15 +12,31 @@
 
     <header class="login-header">
         <div class="login-header__title">Task Manager</div>
-        <form id="app-login-form" class="login-form">
-            <input class="login-form__input" name="login" autocomplete="username" type="text" placeholder="Login"
-                aria-label="Login">
-            <input class="login-form__input" name="password" autocomplete="current-password" type="password"
-                placeholder="Password" aria-label="Password">
-            <button id="app-login-btn" class="login-form__btn" type="submit">Sign In</button>
-        </form>
+        <div class="login-panel">
+            <div class="auth-switch" role="tablist" aria-label="Auth mode">
+                <button type="button" class="auth-switch__btn auth-switch__btn--active" data-auth-mode="login">Вход</button>
+                <button type="button" class="auth-switch__btn" data-auth-mode="signup" aria-selected="false">Регистрация</button>
+            </div>
+            <form id="app-login-form" class="login-form auth-form" autocomplete="on">
+                <input class="login-form__input" name="login" autocomplete="username" type="text" placeholder="Login"
+                    aria-label="Login">
+                <input class="login-form__input" name="password" autocomplete="current-password" type="password"
+                    placeholder="Password" aria-label="Password">
+                <button id="app-login-btn" class="login-form__btn" type="submit">Sign In</button>
+            </form>
+            <form id="app-signup-form" class="login-form auth-form hidden" autocomplete="on">
+                <input class="login-form__input" name="login" autocomplete="username" type="text" placeholder="Login"
+                    aria-label="Login">
+                <input class="login-form__input" name="password" autocomplete="new-password" type="password"
+                    placeholder="Password" aria-label="Password">
+                <input class="login-form__input" name="passwordConfirm" autocomplete="new-password" type="password"
+                    placeholder="Repeat password" aria-label="Repeat password">
+                <button id="app-signup-btn" class="login-form__btn" type="submit">Sign Up</button>
+            </form>
+            <div id="auth-note" class="auth-note">Пожалуйста, авторизуйтесь или зарегистрируйтесь.</div>
+        </div>
     </header>
-    <div id="content" class="page-content">Пожалуйста, авторизуйтесь.</div>
+    <div id="content" class="page-content page-content--centered">Пожалуйста, авторизуйтесь или зарегистрируйтесь.</div>
 
 
 </body>
