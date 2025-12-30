@@ -263,6 +263,7 @@
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  min-height: 520px;
 }
 
 .board-toolbar {
@@ -303,19 +304,26 @@
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
   align-items: stretch;
-  grid-auto-rows: minmax(440px, 1fr);
+  grid-auto-rows: 1fr;
 }
 
 .board__column {
   background: #f5f7fb;
   border-radius: 10px;
   padding: 12px;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   min-height: 440px;
   height: 100%;
   overflow: hidden;
+  box-sizing: border-box;
+}
+
+.board__column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .board__column-title {
@@ -334,20 +342,23 @@
   align-content: start;
   overflow-y: auto;
   min-height: 0;
+  flex: 1;
 }
 
 .board__task {
   background: #fff;
   border-radius: 8px;
-  padding: 12px;
+  padding: 12px 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   gap: 12px;
   height: 100%;
   box-sizing: border-box;
   overflow: hidden;
   min-width: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .board__task--dragging {
@@ -356,9 +367,9 @@
 }
 
 .board__task-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 12px;
   width: 100%;
   min-width: 0;
@@ -370,13 +381,16 @@
   line-height: 1.4;
   flex: 1;
   min-width: 0;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
 }
 
 .board__task-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
   gap: 8px;
 }
 
@@ -404,13 +418,20 @@
 }
 
 .board__task-bottom {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  column-gap: 10px;
+  row-gap: 8px;
   width: 100%;
   min-width: 0;
+}
+
+.board__task-assignee {
+  font-size: 13px;
+  color: #4b5b6a;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .board__task-owner {
@@ -421,6 +442,9 @@
 .board__task-meta {
   font-size: 12px;
   color: #8fa1b3;
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: break-word;
 }
 
 .board__task-delete {
@@ -431,6 +455,9 @@
   width: 28px;
   height: 28px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .board__assignee-control {
