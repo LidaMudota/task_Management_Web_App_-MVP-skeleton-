@@ -440,6 +440,8 @@
   min-width: 0;
   overflow-wrap: break-word;
   white-space: normal;
+  padding: 0 8px;
+  box-sizing: border-box;
 }
 
 .board__task-owner {
