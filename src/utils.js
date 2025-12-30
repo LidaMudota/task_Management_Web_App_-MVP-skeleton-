@@ -44,7 +44,14 @@ export const generateTestUser = function (User) {
     { login: "admin", password: "admin123", role: "admin" },
     { login: "test", password: "qwerty123", role: "user" },
   ];
-  const nextState = [...existingUsers];
+  const nextState = existingUsers.map((user) => {
+    const preset = defaults.find((item) => item.login === user.login);
+    if (!preset) return user;
+    const refreshed = new User(preset.login, preset.password, preset.role);
+    refreshed.id = user.id || refreshed.id;
+    return refreshed;
+  });
+
   defaults.forEach((preset) => {
     const alreadySaved = nextState.some((item) => item.login === preset.login);
     if (!alreadySaved) {
