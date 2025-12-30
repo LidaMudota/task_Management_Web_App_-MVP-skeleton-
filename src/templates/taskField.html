@@ -1,1 +1,32 @@
-<h1>Your tasks here</h1>
+<div class="page">
+  <header class="page__header">
+    <div class="header__left">
+      <h1 class="header__title">Task Manager</h1>
+      <span id="header-hello" class="header__hello"></span>
+    </div>
+    <div class="header__right">
+      <div class="user-menu">
+        <button id="user-menu-toggle" class="user-menu__toggle" type="button">
+          <span class="user-menu__avatar"></span>
+          <span id="user-menu-login" class="user-menu__login"></span>
+          <span class="user-menu__arrow"></span>
+        </button>
+        <ul id="user-menu" class="user-menu__list">
+          <li class="user-menu__item">My account</li>
+          <li class="user-menu__item">My tasks</li>
+          <li class="user-menu__item">Log out</li>
+        </ul>
+      </div>
+      <button id="sign-out-btn" class="header__signout hidden" type="button">Sign Out</button>
+    </div>
+  </header>
+  <main class="page__main">
+    <section id="board" class="board"></section>
+    <aside id="admin-panel" class="admin-panel"></aside>
+  </main>
+  <footer id="footer" class="page__footer">
+    <div class="footer__stat">Active tasks: <span id="active-count">0</span></div>
+    <div class="footer__stat">Finished tasks: <span id="finished-count">0</span></div>
+    <div class="footer__year">Kanban board by Student, 2024</div>
+  </footer>
+</div>

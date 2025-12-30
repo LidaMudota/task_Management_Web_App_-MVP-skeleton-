@@ -1,15 +1,56 @@
 export const getFromStorage = function (key) {
-  return JSON.parse(localStorage.getItem(key) || "[]");
+  const raw = localStorage.getItem(key);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    return [];
+  }
+};
+
+export const setInStorage = function (key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
 };
 
 export const addToStorage = function (obj, key) {
   const storageData = getFromStorage(key);
   storageData.push(obj);
-  localStorage.setItem(key, JSON.stringify(storageData));
+  setInStorage(key, storageData);
+};
+
+export const updateInStorage = function (key, items, idKey = "id") {
+  const current = getFromStorage(key);
+  const merged = current.map((stored) => {
+    const incoming = items.find((item) => item[idKey] === stored[idKey]);
+    return incoming ? incoming : stored;
+  });
+  const newcomers = items.filter(
+    (item) => !merged.some((stored) => stored[idKey] === item[idKey])
+  );
+  setInStorage(key, merged.concat(newcomers));
+};
+
+export const removeFromStorage = function (key, idValue, idKey = "id") {
+  const filtered = getFromStorage(key).filter(
+    (item) => item[idKey] !== idValue
+  );
+  setInStorage(key, filtered);
+  return filtered;
 };
 
 export const generateTestUser = function (User) {
-  localStorage.clear();
-  const testUser = new User("test", "qwerty123");
-  User.save(testUser);
+  const existingUsers = getFromStorage("users");
+  const defaults = [
+    { login: "admin", password: "admin123", role: "admin" },
+    { login: "test", password: "qwerty123", role: "user" },
+  ];
+  const nextState = [...existingUsers];
+  defaults.forEach((preset) => {
+    const alreadySaved = nextState.some((item) => item.login === preset.login);
+    if (!alreadySaved) {
+      const defaultUser = new User(preset.login, preset.password, preset.role);
+      nextState.push(defaultUser);
+    }
+  });
+  setInStorage("users", nextState);
 };
