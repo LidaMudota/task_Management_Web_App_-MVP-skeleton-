@@ -1,0 +1,62 @@
+<div class="page">
+  <header class="page__header">
+    <div class="header__left">
+      <h1 class="header__title">Task Manager</h1>
+      <span id="header-hello" class="header__hello"></span>
+    </div>
+    <div class="header__right">
+      <div class="user-menu">
+        <button id="user-menu-toggle" class="user-menu__toggle" type="button">
+          <span class="user-menu__avatar"></span>
+          <span id="user-menu-login" class="user-menu__login"></span>
+          <span class="user-menu__arrow"></span>
+        </button>
+        <ul id="user-menu" class="user-menu__list">
+          <li class="user-menu__item">
+            <button class="user-menu__button" type="button" data-action="account">My account</button>
+          </li>
+          <li class="user-menu__item">
+            <button class="user-menu__button" type="button" data-action="tasks">My tasks</button>
+          </li>
+          <li class="user-menu__item">
+            <button class="user-menu__button" type="button" data-action="logout">Log out</button>
+          </li>
+        </ul>
+      </div>
+      <button id="sign-out-btn" class="header__signout hidden" type="button">Sign Out</button>
+    </div>
+  </header>
+  <main class="page__main page__main--narrow">
+    <section class="account">
+      <h2 class="account__title">My account</h2>
+      <div class="account__info">
+        <div class="account__row">
+          <span class="account__label">Логин</span>
+          <span id="account-login" class="account__value"></span>
+        </div>
+        <div class="account__row">
+          <span class="account__label">Роль</span>
+          <span id="account-role" class="account__value account__value--badge"></span>
+        </div>
+      </div>
+
+      <form id="account-password-form" class="account__form">
+        <h3 class="account__subtitle">Сменить пароль</h3>
+        <label class="account__field">
+          <span class="account__field-label">Текущий пароль</span>
+          <input class="account__input" name="currentPassword" type="password" autocomplete="current-password" required />
+        </label>
+        <label class="account__field">
+          <span class="account__field-label">Новый пароль</span>
+          <input class="account__input" name="newPassword" type="password" autocomplete="new-password" required minlength="6" />
+        </label>
+        <label class="account__field">
+          <span class="account__field-label">Повторите новый пароль</span>
+          <input class="account__input" name="repeatPassword" type="password" autocomplete="new-password" required minlength="6" />
+        </label>
+        <button class="account__submit" type="submit">Обновить пароль</button>
+        <div id="account-message" class="account__message" aria-live="polite"></div>
+      </form>
+    </section>
+  </main>
+</div>

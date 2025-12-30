@@ -2,10 +2,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/style.css";
 import taskFieldTemplate from "./templates/taskField.html";
 import noAccessTemplate from "./templates/noAccess.html";
+import myAccountTemplate from "./templates/myAccount.html";
 import { User } from "./models/User";
 import { State } from "./state";
-import { authUser, registerUser } from "./services/auth";
+import { authUser, registerUser, signOut } from "./services/auth";
 import { buildBoard, buildHeaderControls } from "./services/board";
+import { buildAccountPage } from "./services/account";
+import { initNavigation } from "./services/navigation";
 import { generateTestUser } from "./utils";
 
 export const appState = new State();
@@ -18,13 +21,53 @@ const modeButtons = document.querySelectorAll("[data-auth-mode]");
 
 const renderNoAccess = () => {
   contentRoot.innerHTML = noAccessTemplate;
-  alert("доступ запрещен");
 };
 
+const attachNavigation = () =>
+  initNavigation({
+    onShowTasks: renderBoard,
+    onShowAccount: renderAccount,
+    onLogout: handleLogout,
+  });
+
 const renderBoard = () => {
+  if (!appState.currentUser) {
+    renderNoAccess();
+    return;
+  }
   contentRoot.innerHTML = taskFieldTemplate;
   buildHeaderControls();
   buildBoard();
+  attachNavigation();
+};
+
+const renderAccount = () => {
+  if (!appState.currentUser) {
+    renderNoAccess();
+    return;
+  }
+  contentRoot.innerHTML = myAccountTemplate;
+  buildHeaderControls();
+  buildAccountPage();
+  attachNavigation();
+};
+
+const setAuthNote = (text, tone = "info") => {
+  if (!authNote) return;
+  authNote.textContent = text;
+  authNote.dataset.tone = tone;
+};
+
+const resetToLogin = () => {
+  switchAuthMode("login");
+  setAuthNote("Пожалуйста, авторизуйтесь.", "info");
+  contentRoot.textContent = "Пожалуйста, авторизуйтесь.";
+};
+
+const handleLogout = () => {
+  if (!appState.currentUser) return;
+  signOut();
+  resetToLogin();
 };
 
 const handleAuthResult = (isAllowed) => {
@@ -33,12 +76,6 @@ const handleAuthResult = (isAllowed) => {
   } else {
     renderNoAccess();
   }
-};
-
-const setAuthNote = (text, tone = "info") => {
-  if (!authNote) return;
-  authNote.textContent = text;
-  authNote.dataset.tone = tone;
 };
 
 const switchAuthMode = (mode) => {
@@ -104,5 +141,6 @@ switchAuthMode("login");
 
 const savedUser = appState.currentUser;
 if (savedUser) {
+  appState.currentUser = savedUser;
   handleAuthResult(true);
 }

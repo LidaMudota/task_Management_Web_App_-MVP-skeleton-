@@ -12,9 +12,15 @@
           <span class="user-menu__arrow"></span>
         </button>
         <ul id="user-menu" class="user-menu__list">
-          <li class="user-menu__item">My account</li>
-          <li class="user-menu__item">My tasks</li>
-          <li class="user-menu__item">Log out</li>
+          <li class="user-menu__item">
+            <button class="user-menu__button" type="button" data-action="account">My account</button>
+          </li>
+          <li class="user-menu__item">
+            <button class="user-menu__button" type="button" data-action="tasks">My tasks</button>
+          </li>
+          <li class="user-menu__item">
+            <button class="user-menu__button" type="button" data-action="logout">Log out</button>
+          </li>
         </ul>
       </div>
       <button id="sign-out-btn" class="header__signout hidden" type="button">Sign Out</button>

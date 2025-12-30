@@ -1,8 +1,7 @@
 import { appState } from "../app";
 import { v4 as uuid } from "uuid";
 import { Task } from "../models/Task";
-import { signOut } from "./auth";
-import { loadTasks, saveTasks, loadUsers, saveUsers, removeUserById } from "./storage";
+import { loadUsers, saveUsers, removeUserById } from "./storage";
 
 const columnFlow = ["backlog", "ready", "in-progress", "finished"];
 
@@ -20,8 +19,6 @@ const activeClass = "board__add--active";
 const disabledClass = "board__add--disabled";
 const draggingClass = "board__task--dragging";
 const dropTargetClass = "board__column--drop-target";
-
-const userMenuSelector = "#user-menu";
 
 const addTaskFormTemplate = () => {
   return `
@@ -334,26 +331,6 @@ const updateFooterCounts = () => {
   footer.querySelector("#finished-count").textContent = finishedCount;
 };
 
-const attachUserMenu = () => {
-  const menuToggle = document.querySelector("#user-menu-toggle");
-  const menuList = document.querySelector(userMenuSelector);
-  if (!menuToggle || !menuList) return;
-  menuToggle.addEventListener("click", () => {
-    menuList.classList.toggle("user-menu__list--open");
-    menuToggle.classList.toggle("user-menu__toggle--open");
-  });
-};
-
-const attachHeaderActions = () => {
-  const signOutBtn = document.querySelector("#sign-out-btn");
-  if (signOutBtn) {
-    signOutBtn.addEventListener("click", () => {
-      signOut();
-      window.location.reload();
-    });
-  }
-};
-
 const renderAdminPanel = () => {
   if (appState.currentUser.role !== "admin") return;
   const adminRoot = document.querySelector("#admin-panel");
@@ -389,8 +366,6 @@ export const buildHeaderControls = () => {
   if (headerHello) headerHello.textContent = `Здравствуйте, ${appState.currentUser.login}`;
   if (signOutBtn) signOutBtn.classList.remove("hidden");
   if (menuLogin) menuLogin.textContent = appState.currentUser.login;
-  attachUserMenu();
-  attachHeaderActions();
 };
 
 export const buildBoard = () => {
