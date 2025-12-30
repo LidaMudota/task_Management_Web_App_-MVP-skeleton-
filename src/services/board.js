@@ -18,6 +18,8 @@ const columnOrder = ["backlog", "ready", "in-progress", "finished"];
 const boardRootSelector = "#board";
 const activeClass = "board__add--active";
 const disabledClass = "board__add--disabled";
+const draggingClass = "board__task--dragging";
+const dropTargetClass = "board__column--drop-target";
 
 const userMenuSelector = "#user-menu";
 
@@ -47,7 +49,8 @@ const renderTaskItem = (task, isAdmin) => {
   const deleteBtn = isAdmin
     ? `<button class="board__task-delete" data-id="${task.id}">✕</button>`
     : "";
-  return `<li class="board__task" data-id="${task.id}" data-owner="${task.owner}" data-status="${task.status}"><span class="board__task-title">${task.title}</span>${ownerLabel}${deleteBtn}</li>`;
+  const canDrag = isAdmin || task.owner === appState.currentUser.login;
+  return `<li class="board__task" data-id="${task.id}" data-owner="${task.owner}" data-status="${task.status}" draggable="${canDrag}"><span class="board__task-title">${task.title}</span>${ownerLabel}${deleteBtn}</li>`;
 };
 
 const renderColumn = (status, tasks, isAdmin) => {
@@ -130,6 +133,7 @@ const rerenderBoard = () => {
   const boardRoot = getBoardRoot();
   boardRoot.innerHTML = renderBoardHtml(tasks, appState.currentUser.role === "admin");
   attachColumnHandlers();
+  attachDragAndDrop();
   updateFooterCounts();
 };
 
@@ -218,6 +222,77 @@ const handleMoveFromDropdown = (column, status) => {
     const item = e.target.closest(".board__dropdown-item");
     if (!item) return;
     moveTaskToNextColumn(item.dataset.id, status);
+  });
+};
+
+const canModifyTask = (task) => {
+  if (!task) return false;
+  return appState.currentUser.role === "admin" || task.owner === appState.currentUser.login;
+};
+
+const attachDragAndDrop = () => {
+  const boardRoot = getBoardRoot();
+  if (!boardRoot) return;
+
+  let draggedTaskId = null;
+
+  const clearDropTargets = () => {
+    boardRoot
+      .querySelectorAll(`.${dropTargetClass}`)
+      .forEach((column) => column.classList.remove(dropTargetClass));
+  };
+
+  boardRoot.querySelectorAll(".board__task").forEach((taskEl) => {
+    const taskId = taskEl.dataset.id;
+    const taskData = appState.tasks.find((task) => task.id === taskId);
+    const isAllowed = canModifyTask(taskData);
+    taskEl.setAttribute("draggable", isAllowed);
+    if (!isAllowed) return;
+
+    taskEl.addEventListener("dragstart", (event) => {
+      draggedTaskId = taskId;
+      taskEl.classList.add(draggingClass);
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", taskId);
+      }
+    });
+
+    taskEl.addEventListener("dragend", () => {
+      draggedTaskId = null;
+      taskEl.classList.remove(draggingClass);
+      clearDropTargets();
+    });
+  });
+
+  boardRoot.querySelectorAll(".board__column").forEach((columnEl) => {
+    const columnStatus = columnEl.dataset.status;
+
+    columnEl.addEventListener("dragover", (event) => {
+      if (!draggedTaskId) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+      columnEl.classList.add(dropTargetClass);
+    });
+
+    columnEl.addEventListener("dragleave", () => {
+      columnEl.classList.remove(dropTargetClass);
+    });
+
+    columnEl.addEventListener("drop", (event) => {
+      event.preventDefault();
+      columnEl.classList.remove(dropTargetClass);
+      if (!draggedTaskId) return;
+      const taskData = appState.tasks.find((task) => task.id === draggedTaskId);
+      if (!canModifyTask(taskData)) return;
+      const nextStatus = columnStatus;
+      if (taskData.status === nextStatus) return;
+      const updated = appState.tasks.map((task) =>
+        task.id === draggedTaskId ? { ...task, status: nextStatus } : task
+      );
+      appState.tasks = updated;
+      rerenderBoard();
+    });
   });
 };
 
@@ -323,6 +398,7 @@ export const buildBoard = () => {
   const boardRoot = getBoardRoot();
   boardRoot.innerHTML = renderBoardHtml(tasks, appState.currentUser.role === "admin");
   attachColumnHandlers();
+  attachDragAndDrop();
   renderAdminPanel();
   updateFooterCounts();
 };
