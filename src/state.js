@@ -3,7 +3,7 @@ import { getFromStorage, setInStorage } from "./utils";
 export class State {
   constructor() {
     this._currentUser = null;
-    this._tasks = getFromStorage("tasks");
+    this._tasks = getFromStorage("tasks", []);
   }
 
   set currentUser(user) {

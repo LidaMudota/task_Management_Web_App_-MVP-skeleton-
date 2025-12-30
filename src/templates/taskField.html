@@ -27,7 +27,47 @@
     </div>
   </header>
   <main class="page__main">
-    <section id="board" class="board"></section>
+    <div class="board-area">
+      <section class="board-toolbar" aria-label="Управление задачами">
+        <div class="board-toolbar__group">
+          <label class="board-toolbar__label">
+            Поиск
+            <input id="task-search" class="board-toolbar__input" type="search" placeholder="Название или описание" />
+          </label>
+        </div>
+        <div class="board-toolbar__group">
+          <label class="board-toolbar__label">
+            Статус
+            <select id="task-status-filter" class="board-toolbar__select">
+              <option value="all">Все</option>
+              <option value="backlog">Backlog</option>
+              <option value="ready">Ready</option>
+              <option value="in-progress">In progress</option>
+              <option value="finished">Finished</option>
+            </select>
+          </label>
+        </div>
+        <div class="board-toolbar__group">
+          <label class="board-toolbar__label">
+            Исполнитель
+            <select id="task-owner-filter" class="board-toolbar__select">
+              <option value="all">Все исполнители</option>
+            </select>
+          </label>
+        </div>
+        <div class="board-toolbar__group">
+          <label class="board-toolbar__label">
+            Сортировка
+            <select id="task-sort" class="board-toolbar__select">
+              <option value="recent">Новые сверху</option>
+              <option value="title">По названию</option>
+              <option value="owner">По исполнителю</option>
+            </select>
+          </label>
+        </div>
+      </section>
+      <section id="board" class="board"></section>
+    </div>
     <aside id="admin-panel" class="admin-panel"></aside>
   </main>
   <footer id="footer" class="page__footer">

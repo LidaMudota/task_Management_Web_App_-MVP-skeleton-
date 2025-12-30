@@ -38,7 +38,24 @@
           <span class="account__label">Роль</span>
           <span id="account-role" class="account__value account__value--badge"></span>
         </div>
+        <div class="account__row">
+          <span class="account__label">Отображаемое имя</span>
+          <span id="account-display" class="account__value"></span>
+        </div>
       </div>
+
+      <form id="account-profile-form" class="account__form">
+        <h3 class="account__subtitle">Настройки профиля</h3>
+        <label class="account__field">
+          <span class="account__field-label">Отображаемое имя</span>
+          <input id="account-display-input" class="account__input" name="displayName" type="text" autocomplete="nickname" required />
+        </label>
+        <label class="account__field">
+          <span class="account__field-label">Email (по желанию)</span>
+          <input id="account-email" class="account__input" name="email" type="email" autocomplete="email" placeholder="you@example.com" />
+        </label>
+        <button class="account__submit" type="submit">Сохранить профиль</button>
+      </form>
 
       <form id="account-password-form" class="account__form">
         <h3 class="account__subtitle">Сменить пароль</h3>
@@ -55,8 +72,8 @@
           <input class="account__input" name="repeatPassword" type="password" autocomplete="new-password" required minlength="6" />
         </label>
         <button class="account__submit" type="submit">Обновить пароль</button>
-        <div id="account-message" class="account__message" aria-live="polite"></div>
       </form>
+      <div id="account-message" class="account__message" aria-live="polite"></div>
     </section>
   </main>
 </div>

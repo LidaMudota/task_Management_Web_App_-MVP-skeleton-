@@ -1,10 +1,10 @@
-export const getFromStorage = function (key) {
+export const getFromStorage = function (key, fallback = []) {
   const raw = localStorage.getItem(key);
-  if (!raw) return [];
+  if (!raw) return fallback;
   try {
     return JSON.parse(raw);
   } catch (e) {
-    return [];
+    return fallback;
   }
 };
 
@@ -39,15 +39,30 @@ export const removeFromStorage = function (key, idValue, idKey = "id") {
 };
 
 export const generateTestUser = function (User) {
-  const existingUsers = getFromStorage("users");
+  const existingUsers = getFromStorage("users", []);
   const defaults = [
-    { login: "admin", password: "admin123", role: "admin" },
-    { login: "test", password: "qwerty123", role: "user" },
+    {
+      login: "admin",
+      password: "admin123",
+      role: "admin",
+      profile: { displayName: "Администратор" },
+    },
+    {
+      login: "test",
+      password: "qwerty123",
+      role: "user",
+      profile: { displayName: "Тестовый пользователь" },
+    },
   ];
   const nextState = existingUsers.map((user) => {
     const preset = defaults.find((item) => item.login === user.login);
     if (!preset) return user;
-    const refreshed = new User(preset.login, preset.password, preset.role);
+    const refreshed = new User(
+      preset.login,
+      preset.password,
+      preset.role,
+      preset.profile
+    );
     refreshed.id = user.id || refreshed.id;
     return refreshed;
   });
@@ -55,7 +70,12 @@ export const generateTestUser = function (User) {
   defaults.forEach((preset) => {
     const alreadySaved = nextState.some((item) => item.login === preset.login);
     if (!alreadySaved) {
-      const defaultUser = new User(preset.login, preset.password, preset.role);
+      const defaultUser = new User(
+        preset.login,
+        preset.password,
+        preset.role,
+        preset.profile
+      );
       nextState.push(defaultUser);
     }
   });
