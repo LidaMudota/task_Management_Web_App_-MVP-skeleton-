@@ -478,6 +478,9 @@ const rerenderBoard = () => {
   const visibleTasks = applyLens(tasks, lens);
   const boardRoot = getBoardRoot();
   if (!boardRoot) return;
+  const isAdmin = appState.currentUser?.role === "admin";
+  boardRoot.classList.toggle("board--admin", isAdmin);
+  boardRoot.classList.toggle("board--user", !isAdmin);
   boardRoot.innerHTML = renderBoardHtml(visibleTasks, {
     owners: buildOwnerOptions(appState.currentUser),
     canEdit: canModifyTask,
