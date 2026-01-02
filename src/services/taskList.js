@@ -15,60 +15,63 @@ const buildInitials = (text = "") => {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 };
 
-const renderAssignment = (task, owners, isEditable) => {
-  const label = owners.find((user) => user.value === task.owner)?.label || task.owner;
+const renderAssignment = (task, owners) => {
+  const label =
+    owners.find((user) => user.value === task.owner)?.label || task.owner || "не назначен";
   const initials = buildInitials(label);
 
-  if (!isEditable) {
-    return `
-      <div class="board__assignee-chip" aria-label="Назначена: ${label}">
-        <span class="board__assignee-avatar" aria-hidden="true">${initials}</span>
-        <div class="board__assignee-text">
-          <span class="board__assignee-label">Исполнитель</span>
-          <span class="board__assignee-name">${label}</span>
-        </div>
-      </div>
-    `;
-  }
-
-  const options = owners
-    .map(
-      (user) =>
-        `<option value="${user.value}" ${user.value === task.owner ? "selected" : ""}>${user.label}</option>`
-    )
-    .join("");
-
   return `
-    <div class="board__assignee-control">
-      <div class="board__assignee-chip" aria-label="Текущий исполнитель: ${label}">
-        <span class="board__assignee-avatar" aria-hidden="true">${initials}</span>
-        <div class="board__assignee-text">
-          <span class="board__assignee-label">Исполнитель</span>
-          <span class="board__assignee-name">${label}</span>
-        </div>
-      </div>
-      <div class="board__assignee-select">
-        <label class="board__assignee-label" for="assignee-${task.id}">Переназначить</label>
-        <select id="assignee-${task.id}" class="board__assignee" data-id="${task.id}">
-          ${options}
-        </select>
+    <div class="board__assignee-chip" aria-label="Назначена: ${label}">
+      <span class="board__assignee-avatar" aria-hidden="true">${initials}</span>
+      <div class="board__assignee-text">
+        <span class="board__assignee-label">Исполнитель</span>
+        <span class="board__assignee-name">${label}</span>
       </div>
     </div>
   `;
 };
 
-const renderDeleteButton = (taskId, canDelete) =>
-  canDelete
-    ? `<button class="board__task-delete" data-id="${taskId}" data-action="delete" type="button">✕</button>`
-    : "";
+const renderActionsMenu = (task, context) => {
+  const { canEdit, canDelete } = context;
+  const isEditable = typeof canEdit === "function" ? canEdit(task) : !!canEdit;
+  const isDeletable = typeof canDelete === "function" ? canDelete(task) : !!canDelete;
+  const assigneeName = context.owners.find((user) => user.value === task.owner)?.label || task.owner || "не назначен";
+
+  return `
+    <div class="task-menu" data-task-id="${task.id}">
+      <button
+        class="task-menu__trigger"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        aria-label="Меню задачи"
+        data-id="${task.id}"
+        data-action="open-menu"
+        draggable="false"
+      >
+        ⋯
+      </button>
+      <div class="task-menu__dropdown" role="menu" aria-label="Действия с задачей" hidden>
+        <button class="task-menu__item" type="button" role="menuitem" draggable="false" data-id="${task.id}" data-action="edit" ${
+          isEditable ? "" : "disabled"
+        }>Изменить</button>
+        <button class="task-menu__item" type="button" role="menuitem" draggable="false" data-id="${task.id}" data-action="complete" ${
+          isEditable ? "" : "disabled"
+        }>Готово</button>
+        <div class="task-menu__label" role="presentation">Исполнитель: ${assigneeName}</div>
+        <button class="task-menu__item task-menu__item--danger" type="button" role="menuitem" draggable="false" data-id="${task.id}" data-action="delete" ${
+          isDeletable ? "" : "disabled"
+        }>Удалить</button>
+      </div>
+    </div>
+  `;
+};
 
 export const renderTaskCard = (task, context) => {
   const { owners, canEdit, canDelete, canDrag } = context;
-  const isEditable = typeof canEdit === "function" ? canEdit(task) : !!canEdit;
-  const isDeletable = typeof canDelete === "function" ? canDelete(task) : !!canDelete;
   const draggable = typeof canDrag === "function" ? canDrag(task) : !!canDrag;
-  const assignmentBlock = renderAssignment(task, owners, isEditable);
-  const deleteButton = renderDeleteButton(task.id, isDeletable);
+  const assignmentBlock = renderAssignment(task, owners);
+  const actionsMenu = renderActionsMenu(task, context);
   return fillTemplate(taskCardTemplate, {
     id: task.id,
     title: task.title,
@@ -76,7 +79,7 @@ export const renderTaskCard = (task, context) => {
     status: task.status,
     draggable: draggable ? "true" : "false",
     assignment: assignmentBlock,
-    deleteButton,
+    actionsMenu,
     createdAt: new Date(task.createdAt).toLocaleDateString("ru-RU"),
   });
 };

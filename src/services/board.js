@@ -3,14 +3,7 @@ import { v4 as uuid } from "uuid";
 import { loadUsers, saveUsers, removeUserById } from "./storage";
 import { renderBoardHtml } from "./taskList";
 import { buildOwnerOptions, applyLens, defaultLens } from "./taskLens";
-import {
-  assignTask,
-  createTask,
-  hydrateTasks,
-  moveTask,
-  removeTask,
-  retitleTask,
-} from "./taskEditor";
+import { createTask, hydrateTasks, moveTask, removeTask, retitleTask } from "./taskEditor";
 import { columnFlow } from "./taskScheme";
 
 const boardRootSelector = "#board";
@@ -232,13 +225,6 @@ const handleColumnAdd = (status, column) => {
   buildDropdown(column, status);
 };
 
-const handleAssignment = (taskId, owner) => {
-  const task = appState.tasks.find((item) => item.id === taskId);
-  if (!canModifyTask(task)) return;
-  assignTask(taskId, owner);
-  rerenderBoard();
-};
-
 const handleEdit = (taskId) => {
   const target = appState.tasks.find((task) => task.id === taskId);
   if (!canModifyTask(target)) return;
@@ -253,6 +239,8 @@ const handleEdit = (taskId) => {
 const handleDelete = (taskId) => {
   const target = appState.tasks.find((task) => task.id === taskId);
   if (!canDeleteTask(target)) return;
+  const confirmed = window.confirm("Удалить задачу без возможности восстановления?");
+  if (!confirmed) return;
   removeTask(taskId);
   rerenderBoard();
 };
@@ -264,37 +252,132 @@ const handleComplete = (taskId) => {
   rerenderBoard();
 };
 
+let openedMenuId = null;
+let lastMenuTrigger = null;
+let lastMenuTriggerTaskId = null;
+let listenersBound = false;
+
+const closeAllTaskMenus = ({ restoreFocus, preserveTriggerId } = { restoreFocus: false, preserveTriggerId: false }) => {
+  document.querySelectorAll(".task-menu__dropdown").forEach((menu) => {
+    menu.hidden = true;
+    menu.parentElement?.querySelector(".task-menu__trigger")?.setAttribute("aria-expanded", "false");
+  });
+  openedMenuId = null;
+  if (restoreFocus) {
+    const connectedTrigger =
+      lastMenuTrigger instanceof HTMLElement && document.contains(lastMenuTrigger)
+        ? lastMenuTrigger
+        : null;
+    const fallbackTrigger = document.querySelector(
+      `.task-menu[data-task-id="${lastMenuTriggerTaskId}"] .task-menu__trigger`
+    );
+    (connectedTrigger || fallbackTrigger)?.focus();
+  }
+  lastMenuTrigger = null;
+  if (!preserveTriggerId) lastMenuTriggerTaskId = null;
+};
+
+const focusFirstMenuItem = (menu) => {
+  const firstItem = menu.querySelector(".task-menu__item:not([disabled])");
+  if (firstItem instanceof HTMLElement) {
+    firstItem.focus();
+  }
+};
+
+const toggleTaskMenu = (taskId, trigger) => {
+  if (!(trigger instanceof HTMLElement)) return;
+  const menuWrapper = trigger.closest(".task-menu");
+  const menu = menuWrapper?.querySelector(".task-menu__dropdown");
+  if (!menu) return;
+
+  if (openedMenuId && openedMenuId !== taskId) {
+    closeAllTaskMenus();
+  }
+
+  const isOpen = menu.hidden === false;
+  if (isOpen) {
+    menu.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.focus();
+    openedMenuId = null;
+    lastMenuTrigger = null;
+    lastMenuTriggerTaskId = null;
+    return;
+  }
+
+  menu.hidden = false;
+  trigger.setAttribute("aria-expanded", "true");
+  lastMenuTrigger = trigger;
+  lastMenuTriggerTaskId = taskId;
+  openedMenuId = taskId;
+  focusFirstMenuItem(menu);
+};
+
+const handleOutsideClick = (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) return;
+  if (target.closest(".task-menu")) return;
+  closeAllTaskMenus({ restoreFocus: true });
+};
+
+const handleGlobalKeydown = (event) => {
+  if (event.key !== "Escape") return;
+  const wasOpen = openedMenuId !== null;
+  closeAllTaskMenus({ restoreFocus: wasOpen });
+};
+
+const bindGlobalMenuListeners = () => {
+  if (listenersBound) return;
+  document.addEventListener("click", handleOutsideClick);
+  document.addEventListener("keydown", handleGlobalKeydown);
+  listenersBound = true;
+};
+
 const attachColumnHandlers = () => {
   const boardRoot = getBoardRoot();
   if (!boardRoot) return;
+  bindGlobalMenuListeners();
   boardRoot.querySelectorAll(".board__column").forEach((column) => {
     const status = column.getAttribute("data-status");
     const addBtn = column.querySelector(".board__add");
     addBtn.addEventListener("click", () => handleColumnAdd(status, column));
     column.addEventListener("click", (e) => {
-      const action = e.target.dataset.action;
-      const taskId = e.target.dataset.id || e.target.closest(".board__task")?.dataset.id;
+      const button = e.target.closest("[data-action]");
+      if (!button) return;
+      const action = button.dataset.action;
+      const taskId = button.dataset.id || button.closest(".board__task")?.dataset.id;
       if (!taskId) return;
       switch (action) {
+        case "open-menu":
+          toggleTaskMenu(taskId, button);
+          return;
         case "delete":
           handleDelete(taskId);
+          closeAllTaskMenus({ restoreFocus: true });
           return;
         case "edit":
           handleEdit(taskId);
+          closeAllTaskMenus({ restoreFocus: true });
           return;
         case "complete":
           handleComplete(taskId);
+          closeAllTaskMenus({ restoreFocus: true });
           return;
         default:
           break;
       }
-      if (e.target.classList.contains("board__task-title")) {
-        handleEdit(taskId);
-      }
     });
-    column.addEventListener("change", (event) => {
-      if (event.target.classList.contains("board__assignee")) {
-        handleAssignment(event.target.dataset.id, event.target.value);
+    column.addEventListener("keydown", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.dataset.action;
+      if (!action) return;
+      if (["Enter", " "].includes(event.key)) {
+        event.preventDefault();
+        target.click();
+      }
+      if (event.key === "Escape") {
+        closeAllTaskMenus({ restoreFocus: true });
       }
     });
   });
@@ -390,6 +473,7 @@ const syncFilterControls = () => {
 
 const rerenderBoard = () => {
   hydrateTasks();
+  closeAllTaskMenus({ preserveTriggerId: true });
   const tasks = getTasksForCurrentUser();
   const visibleTasks = applyLens(tasks, lens);
   const boardRoot = getBoardRoot();

@@ -1,11 +1,7 @@
 <li class="board__task" data-id="{{id}}" data-owner="{{owner}}" data-status="{{status}}" draggable="{{draggable}}">
   <div class="board__task-top">
     <span class="board__task-title">{{title}}</span>
-    <div class="board__task-actions">
-      <button class="board__task-edit" data-id="{{id}}" data-action="edit" type="button">Изменить</button>
-      <button class="board__task-complete" data-id="{{id}}" data-action="complete" type="button">Готово</button>
-      {{deleteButton}}
-    </div>
+    {{actionsMenu}}
   </div>
   <div class="board__task-bottom">
     <div class="board__task-assignee">{{assignment}}</div>
