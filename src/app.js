@@ -36,6 +36,14 @@ const renderBoard = () => {
     return;
   }
   contentRoot.innerHTML = taskFieldTemplate;
+  const pageMain = document.querySelector(".page__main");
+  const adminPanel = document.querySelector("#admin-panel");
+  if (appState.currentUser.role !== "admin") {
+    adminPanel?.remove();
+    pageMain?.classList.add("page__main--narrow");
+  } else {
+    pageMain?.classList.remove("page__main--narrow");
+  }
   buildHeaderControls();
   buildBoard();
   attachNavigation();
