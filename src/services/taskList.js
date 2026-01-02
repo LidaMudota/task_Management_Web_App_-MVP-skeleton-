@@ -7,10 +7,28 @@ const fillTemplate = (template, replacements) =>
     template
   );
 
+const buildInitials = (text = "") => {
+  const trimmed = text.trim();
+  if (!trimmed) return "?";
+  const parts = trimmed.split(" ").filter(Boolean);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+};
+
 const renderAssignment = (task, owners, isEditable) => {
+  const label = owners.find((user) => user.value === task.owner)?.label || task.owner;
+  const initials = buildInitials(label);
+
   if (!isEditable) {
-    const label = owners.find((user) => user.value === task.owner)?.label || task.owner;
-    return `<span class="board__task-owner">Назначена: ${label}</span>`;
+    return `
+      <div class="board__assignee-chip" aria-label="Назначена: ${label}">
+        <span class="board__assignee-avatar" aria-hidden="true">${initials}</span>
+        <div class="board__assignee-text">
+          <span class="board__assignee-label">Исполнитель</span>
+          <span class="board__assignee-name">${label}</span>
+        </div>
+      </div>
+    `;
   }
 
   const options = owners
@@ -21,12 +39,21 @@ const renderAssignment = (task, owners, isEditable) => {
     .join("");
 
   return `
-    <label class="board__assignee-control">
-      <span class="board__assignee-label">Назначить</span>
-      <select class="board__assignee" data-id="${task.id}">
-        ${options}
-      </select>
-    </label>
+    <div class="board__assignee-control">
+      <div class="board__assignee-chip" aria-label="Текущий исполнитель: ${label}">
+        <span class="board__assignee-avatar" aria-hidden="true">${initials}</span>
+        <div class="board__assignee-text">
+          <span class="board__assignee-label">Исполнитель</span>
+          <span class="board__assignee-name">${label}</span>
+        </div>
+      </div>
+      <div class="board__assignee-select">
+        <label class="board__assignee-label" for="assignee-${task.id}">Переназначить</label>
+        <select id="assignee-${task.id}" class="board__assignee" data-id="${task.id}">
+          ${options}
+        </select>
+      </div>
+    </div>
   `;
 };
 
