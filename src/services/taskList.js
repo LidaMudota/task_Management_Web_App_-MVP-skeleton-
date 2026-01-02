@@ -7,30 +7,6 @@ const fillTemplate = (template, replacements) =>
     template
   );
 
-const buildInitials = (text = "") => {
-  const trimmed = text.trim();
-  if (!trimmed) return "?";
-  const parts = trimmed.split(" ").filter(Boolean);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
-};
-
-const renderAssignment = (task, owners) => {
-  const label =
-    owners.find((user) => user.value === task.owner)?.label || task.owner || "не назначен";
-  const initials = buildInitials(label);
-
-  return `
-    <div class="board__assignee-chip" aria-label="Назначена: ${label}">
-      <span class="board__assignee-avatar" aria-hidden="true">${initials}</span>
-      <div class="board__assignee-text">
-        <span class="board__assignee-label">Исполнитель</span>
-        <span class="board__assignee-name">${label}</span>
-      </div>
-    </div>
-  `;
-};
-
 const renderActionsMenu = (task, context) => {
   const { canEdit, canDelete } = context;
   const isEditable = typeof canEdit === "function" ? canEdit(task) : !!canEdit;
@@ -68,9 +44,8 @@ const renderActionsMenu = (task, context) => {
 };
 
 export const renderTaskCard = (task, context) => {
-  const { owners, canEdit, canDelete, canDrag } = context;
+  const { canEdit, canDelete, canDrag } = context;
   const draggable = typeof canDrag === "function" ? canDrag(task) : !!canDrag;
-  const assignmentBlock = renderAssignment(task, owners);
   const actionsMenu = renderActionsMenu(task, context);
   return fillTemplate(taskCardTemplate, {
     id: task.id,
@@ -78,7 +53,6 @@ export const renderTaskCard = (task, context) => {
     owner: task.owner,
     status: task.status,
     draggable: draggable ? "true" : "false",
-    assignment: assignmentBlock,
     actionsMenu,
     createdAt: new Date(task.createdAt).toLocaleDateString("ru-RU"),
   });
