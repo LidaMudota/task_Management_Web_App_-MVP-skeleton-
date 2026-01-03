@@ -10,6 +10,7 @@ import { buildBoard, buildHeaderControls } from "./services/board";
 import { buildAccountPage } from "./services/account";
 import { initNavigation } from "./services/navigation";
 import { generateTestUser } from "./utils";
+import { mountDepthWeave } from "./services/depthWeave";
 
 export const appState = new State();
 
@@ -154,3 +155,5 @@ if (savedUser) {
   appState.currentUser = savedUser;
   handleAuthResult({ ok: true });
 }
+
+mountDepthWeave();
