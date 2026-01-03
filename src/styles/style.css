@@ -143,6 +143,8 @@
   border-bottom: 1px solid #e5eaf1;
   background: #ffffffc7;
   backdrop-filter: blur(6px);
+  position: relative;
+  z-index: 20; /* держим хедер и его меню над админским списком */
 }
 
 .header__title {
