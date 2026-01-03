@@ -520,7 +520,9 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 200px;
+  min-width: 160px;
+  max-width: min(260px, calc(100vw - 16px));
+  width: max-content;
   background: #fff;
   border: 1px solid #e2e8f2;
   border-radius: 12px;
@@ -529,6 +531,7 @@
   display: grid;
   gap: 6px;
   z-index: 10;
+  overflow: hidden;
 }
 
 .task-menu-layer {
@@ -562,6 +565,9 @@
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.12s ease, box-shadow 0.12s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .task-menu__item:hover,
@@ -600,6 +606,9 @@
   background: #f8fafc;
   border-radius: 10px;
   border: 1px dashed #dce4f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .board__task-bottom {
