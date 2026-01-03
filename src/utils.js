@@ -1,41 +1,34 @@
+import {
+  appendToVault,
+  clearVaultKey,
+  mergeVaultItems,
+  readFromVault,
+  removeFromVault,
+  stashInVault,
+} from "./services/storageVault";
+
 export const getFromStorage = function (key, fallback = []) {
-  const raw = localStorage.getItem(key);
-  if (!raw) return fallback;
-  try {
-    return JSON.parse(raw);
-  } catch (e) {
-    return fallback;
-  }
+  return readFromVault(key, fallback) ?? fallback;
 };
 
 export const setInStorage = function (key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
+  return stashInVault(key, data);
 };
 
 export const addToStorage = function (obj, key) {
-  const storageData = getFromStorage(key);
-  storageData.push(obj);
-  setInStorage(key, storageData);
+  return appendToVault(key, obj);
 };
 
 export const updateInStorage = function (key, items, idKey = "id") {
-  const current = getFromStorage(key);
-  const merged = current.map((stored) => {
-    const incoming = items.find((item) => item[idKey] === stored[idKey]);
-    return incoming ? incoming : stored;
-  });
-  const newcomers = items.filter(
-    (item) => !merged.some((stored) => stored[idKey] === item[idKey])
-  );
-  setInStorage(key, merged.concat(newcomers));
+  return mergeVaultItems(key, items, idKey);
 };
 
 export const removeFromStorage = function (key, idValue, idKey = "id") {
-  const filtered = getFromStorage(key).filter(
-    (item) => item[idKey] !== idValue
-  );
-  setInStorage(key, filtered);
-  return filtered;
+  return removeFromVault(key, idValue, idKey);
+};
+
+export const resetStorageKey = function (key) {
+  return clearVaultKey(key);
 };
 
 export const generateTestUser = function (userFactory) {

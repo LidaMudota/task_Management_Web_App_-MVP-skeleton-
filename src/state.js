@@ -1,4 +1,4 @@
-import { getFromStorage, setInStorage } from "./utils";
+import { getFromStorage, resetStorageKey, setInStorage } from "./utils";
 
 export class State {
   constructor() {
@@ -11,7 +11,7 @@ export class State {
     if (user) {
       setInStorage("currentUser", user);
     } else {
-      localStorage.removeItem("currentUser");
+      resetStorageKey("currentUser");
     }
   }
 
