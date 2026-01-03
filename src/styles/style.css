@@ -431,6 +431,7 @@
   overflow-y: auto;
   min-height: 0;
   flex: 1;
+  max-height: var(--task-list-max-height, none);
 }
 
 .board__task {
@@ -528,6 +529,26 @@
   display: grid;
   gap: 6px;
   z-index: 10;
+}
+
+.task-menu-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.task-menu__dropdown--floating {
+  position: fixed;
+  pointer-events: auto;
+}
+
+.task-menu__dropdown--floating:focus-visible {
+  outline: none;
+}
+
+.task-menu__placeholder {
+  display: none;
 }
 
 .task-menu__item {
