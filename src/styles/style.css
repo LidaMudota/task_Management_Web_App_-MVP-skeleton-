@@ -1,7 +1,8 @@
+
 .page-body {
   margin: 0;
   font-family: "Inter", "Segoe UI", sans-serif;
-  background: #f5f7fb;
+  background: radial-gradient(140% 140% at 12% 12%, #0a1d34 0%, #081120 28%, #050a18 56%, #050a18 100%);
   color: #0c1a2b;
   line-height: 1.5;
   min-height: 100vh;
@@ -15,9 +16,8 @@
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(circle at 20% 20%, rgba(27, 120, 226, 0.14), transparent 38%),
-    radial-gradient(circle at 80% 10%, rgba(20, 184, 166, 0.14), transparent 32%),
-    radial-gradient(circle at 50% 90%, rgba(15, 76, 129, 0.18), transparent 44%);
+  background: linear-gradient(135deg, #050a18 0%, #081428 42%, #0a1c33 100%);
+  isolation: isolate;
 }
 
 .depth-stage__canvas {
@@ -25,31 +25,49 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 12px 24px rgba(12, 26, 43, 0.35));
+  filter: drop-shadow(0 18px 32px rgba(8, 18, 37, 0.5));
   mix-blend-mode: screen;
-  opacity: 0.9;
+  opacity: 0.88;
+  z-index: 2;
+  pointer-events: none;
 }
 
 .depth-stage__glow {
   position: absolute;
-  width: 520px;
-  height: 520px;
+  width: 780px;
+  height: 780px;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.6;
+  filter: blur(150px);
+  opacity: 0.5;
   transform: translateZ(0);
+  z-index: 1;
+  pointer-events: none;
 }
 
 .depth-stage__glow--left {
-  top: -120px;
-  left: -200px;
-  background: radial-gradient(circle, rgba(27, 120, 226, 0.32), transparent 68%);
+  top: -220px;
+  left: -260px;
+  background: radial-gradient(circle at 30% 30%, rgba(27, 120, 226, 0.46), transparent 72%);
 }
 
 .depth-stage__glow--right {
-  bottom: -120px;
-  right: -260px;
-  background: radial-gradient(circle, rgba(20, 184, 166, 0.32), transparent 70%);
+  bottom: -260px;
+  right: -320px;
+  background: radial-gradient(circle at 70% 70%, rgba(20, 184, 166, 0.4), transparent 74%);
+}
+
+.depth-stage__veil {
+  position: absolute;
+  inset: -6%;
+  background: radial-gradient(120% 120% at 18% 18%, rgba(36, 117, 224, 0.24), transparent 52%),
+    radial-gradient(110% 110% at 82% 16%, rgba(22, 175, 161, 0.2), transparent 54%),
+    radial-gradient(130% 100% at 50% 80%, rgba(26, 90, 160, 0.2), transparent 60%),
+    linear-gradient(140deg, rgba(5, 11, 24, 0.88), rgba(7, 14, 30, 0.76));
+  mix-blend-mode: soft-light;
+  opacity: 0.94;
+  backdrop-filter: blur(12px) saturate(140%);
+  z-index: 3;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -58,8 +76,8 @@
   }
 
   .depth-stage__glow {
-    filter: blur(80px);
-    opacity: 0.35;
+    filter: blur(120px);
+    opacity: 0.28;
   }
 }
 
