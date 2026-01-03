@@ -38,7 +38,8 @@ export const removeFromStorage = function (key, idValue, idKey = "id") {
   return filtered;
 };
 
-export const generateTestUser = function (User) {
+export const generateTestUser = function (userFactory) {
+  if (typeof userFactory !== "function") return;
   const existingUsers = getFromStorage("users", []);
   const defaults = [
     {
@@ -54,30 +55,13 @@ export const generateTestUser = function (User) {
       profile: { displayName: "Тестовый пользователь" },
     },
   ];
-  const nextState = existingUsers.map((user) => {
-    const preset = defaults.find((item) => item.login === user.login);
-    if (!preset) return user;
-    const refreshed = new User(
-      preset.login,
-      preset.password,
-      preset.role,
-      preset.profile
+
+  const normalized = defaults.map((preset) => {
+    const existing = existingUsers.find(
+      (user) => user.login.toLowerCase() === preset.login.toLowerCase()
     );
-    refreshed.id = user.id || refreshed.id;
-    return refreshed;
+    return existing || userFactory(preset);
   });
 
-  defaults.forEach((preset) => {
-    const alreadySaved = nextState.some((item) => item.login === preset.login);
-    if (!alreadySaved) {
-      const defaultUser = new User(
-        preset.login,
-        preset.password,
-        preset.role,
-        preset.profile
-      );
-      nextState.push(defaultUser);
-    }
-  });
-  setInStorage("users", nextState);
+  setInStorage("users", normalized);
 };

@@ -78,8 +78,8 @@ const handleLogout = () => {
   resetToLogin();
 };
 
-const handleAuthResult = (isAllowed) => {
-  if (isAllowed) {
+const handleAuthResult = (result) => {
+  if (result?.ok) {
     renderBoard();
   } else {
     renderNoAccess();
@@ -102,7 +102,9 @@ const switchAuthMode = (mode) => {
   setAuthNote(noteText, "info");
 };
 
-generateTestUser(User);
+generateTestUser(
+  (preset) => new User(preset.login, preset.password, preset.role, preset.profile)
+);
 
 loginForm.addEventListener("submit", function (e) {
   e.preventDefault();
@@ -110,13 +112,13 @@ loginForm.addEventListener("submit", function (e) {
   const login = formData.get("login");
   const password = formData.get("password");
 
-  const canLogin = authUser(login, password);
-  if (!canLogin) {
-    setAuthNote("Неверный логин или пароль. Попробуйте снова.", "error");
+  const loginResult = authUser(login, password);
+  if (!loginResult.ok) {
+    setAuthNote(loginResult.message || "Неверный логин или пароль. Попробуйте снова.", "error");
   } else {
     setAuthNote("С возвращением!", "success");
   }
-  handleAuthResult(canLogin);
+  handleAuthResult(loginResult);
 });
 
 signupForm.addEventListener("submit", function (e) {
@@ -138,7 +140,7 @@ signupForm.addEventListener("submit", function (e) {
   }
 
   setAuthNote("Аккаунт создан! Добро пожаловать.", "success");
-  handleAuthResult(true);
+  handleAuthResult(result);
 });
 
 modeButtons.forEach((btn) => {
@@ -150,5 +152,5 @@ switchAuthMode("login");
 const savedUser = appState.currentUser;
 if (savedUser) {
   appState.currentUser = savedUser;
-  handleAuthResult(true);
+  handleAuthResult({ ok: true });
 }

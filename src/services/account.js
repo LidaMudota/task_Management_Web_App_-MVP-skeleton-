@@ -1,5 +1,5 @@
 import { appState } from "../app";
-import { loadUsers, saveUsers } from "./storage";
+import { updateUserPassword, updateUserProfile } from "./userRegistry";
 
 const getMessageEl = () => document.querySelector("#account-message");
 
@@ -8,37 +8,6 @@ const showMessage = (text, tone = "info") => {
   if (!messageEl) return;
   messageEl.textContent = text;
   messageEl.dataset.tone = tone;
-};
-
-const updateUserPassword = (newPassword) => {
-  const users = loadUsers();
-  const current = appState.currentUser;
-  const idx = users.findIndex((user) => user.id === current.id);
-  if (idx === -1) {
-    return { ok: false, message: "Пользователь не найден. Попробуйте войти заново." };
-  }
-  users[idx] = { ...users[idx], password: newPassword };
-  saveUsers(users);
-  appState.currentUser = { ...current, password: newPassword };
-  return { ok: true };
-};
-
-const updateProfile = (profile) => {
-  const users = loadUsers();
-  const current = appState.currentUser;
-  const idx = users.findIndex((user) => user.id === current.id);
-  if (idx === -1) {
-    return { ok: false, message: "Пользователь не найден. Попробуйте войти заново." };
-  }
-  const nextProfile = {
-    ...users[idx].profile,
-    ...profile,
-    displayName: profile.displayName || users[idx].profile?.displayName || users[idx].login,
-  };
-  users[idx] = { ...users[idx], profile: nextProfile };
-  saveUsers(users);
-  appState.currentUser = { ...current, profile: nextProfile };
-  return { ok: true };
 };
 
 const handlePasswordSubmit = (event) => {
@@ -55,30 +24,24 @@ const handlePasswordSubmit = (event) => {
     return;
   }
 
-  const users = loadUsers();
-  const storedUser = users.find((user) => user.id === current.id);
-  if (!storedUser || storedUser.password !== currentPassword) {
-    showMessage("Текущий пароль указан неверно.", "error");
-    return;
-  }
-
-  if (newPassword.length < 6) {
-    showMessage("Новый пароль должен быть не короче 6 символов.", "error");
-    return;
-  }
-
   if (newPassword !== repeatPassword) {
     showMessage("Пароли не совпадают. Попробуйте снова.", "error");
     return;
   }
 
-  const updateResult = updateUserPassword(newPassword);
+  if (current.password !== currentPassword) {
+    showMessage("Текущий пароль указан неверно.", "error");
+    return;
+  }
+
+  const updateResult = updateUserPassword(current.id, newPassword);
   if (!updateResult.ok) {
     showMessage(updateResult.message, "error");
     return;
   }
 
   event.target.reset();
+  appState.currentUser = { ...appState.currentUser, ...updateResult.user };
   showMessage("Пароль обновлён.", "success");
 };
 
@@ -93,12 +56,13 @@ const handleProfileSubmit = (event) => {
     return;
   }
 
-  const updateResult = updateProfile({ displayName, email });
+  const updateResult = updateUserProfile(appState.currentUser.id, { displayName, email });
   if (!updateResult.ok) {
     showMessage(updateResult.message, "error");
     return;
   }
 
+  appState.currentUser = { ...appState.currentUser, ...updateResult.user };
   showMessage("Профиль обновлён.", "success");
 };
 

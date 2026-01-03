@@ -1,6 +1,5 @@
 import { appState } from "../app";
-import { v4 as uuid } from "uuid";
-import { loadUsers, saveUsers, removeUserById } from "./storage";
+import { removeUser, createUser, listUsers } from "./userRegistry";
 import { renderBoardHtml } from "./taskList";
 import { buildOwnerOptions, applyLens, defaultLens } from "./taskLens";
 import { createTask, hydrateTasks, moveTask, removeTask, retitleTask } from "./taskEditor";
@@ -84,8 +83,8 @@ const canMoveFromPrev = (status, allTasks) => {
   return allTasks.some((task) => task.status === prevStatus);
 };
 
-const getTasksForCurrentUser = () => {
-  const allTasks = appState.tasks || [];
+const getTasksForCurrentUser = (tasks = appState.tasks || []) => {
+  const allTasks = tasks.length ? tasks : appState.tasks || [];
   if (appState.currentUser.role === "admin") return allTasks;
   return allTasks.filter((task) => task.owner === appState.currentUser.login);
 };
@@ -171,7 +170,11 @@ const buildDropdown = (column, status) => {
   dropdown.addEventListener("click", (e) => {
     const item = e.target.closest(".board__dropdown-item");
     if (!item) return;
-    moveTask(item.dataset.id, status);
+    const moveResult = moveTask(item.dataset.id, status);
+    if (!moveResult.ok) {
+      alert(moveResult.message);
+      return;
+    }
     rerenderBoard();
   });
 };
@@ -186,8 +189,12 @@ const addTaskForm = (column) => {
   const submitTask = () => {
     const value = input.value.trim();
     if (value) {
-      createTask(value, appState.currentUser.login);
-      rerenderBoard();
+      const result = createTask(value, appState.currentUser.login);
+      if (!result.ok) {
+        alert(result.message);
+      } else {
+        rerenderBoard();
+      }
     } else {
       addBtn.textContent = "+ Add card";
       input.remove();
@@ -233,7 +240,11 @@ const handleEdit = (taskId) => {
   if (nextTitle === null) return;
   const trimmed = nextTitle.trim();
   if (!trimmed) return;
-  retitleTask(taskId, trimmed);
+  const result = retitleTask(taskId, trimmed);
+  if (!result.ok) {
+    alert(result.message);
+    return;
+  }
   rerenderBoard();
 };
 
@@ -242,14 +253,22 @@ const handleDelete = (taskId) => {
   if (!canDeleteTask(target)) return;
   const confirmed = window.confirm("Удалить задачу без возможности восстановления?");
   if (!confirmed) return;
-  removeTask(taskId);
+  const result = removeTask(taskId);
+  if (!result.ok) {
+    alert(result.message);
+    return;
+  }
   rerenderBoard();
 };
 
 const handleComplete = (taskId) => {
   const target = appState.tasks.find((task) => task.id === taskId);
   if (!canModifyTask(target)) return;
-  moveTask(taskId, "finished");
+  const result = moveTask(taskId, "finished");
+  if (!result.ok) {
+    alert(result.message);
+    return;
+  }
   rerenderBoard();
 };
 
@@ -387,7 +406,7 @@ const attachColumnHandlers = () => {
 const renderAdminPanel = () => {
   const adminRoot = document.querySelector("#admin-panel");
   if (!adminRoot || appState.currentUser.role !== "admin") return;
-  const users = loadUsers();
+  const users = listUsers();
   adminRoot.innerHTML = renderUserList(users);
   const addBtn = adminRoot.querySelector(".user-admin__submit");
   const loginInput = adminRoot.querySelectorAll(".user-admin__input")[0];
@@ -398,21 +417,19 @@ const renderAdminPanel = () => {
     const password = passInput.value.trim();
     const role = roleSelect.value;
     if (!login || !password) return;
-    const usersList = loadUsers();
-    usersList.push({
-      id: uuid(),
-      login,
-      password,
-      role,
-      profile: { displayName: login },
+    const createResult = createUser(login, password, role, {
+      displayName: login,
     });
-    saveUsers(usersList);
+    if (!createResult.ok) {
+      alert(createResult.message);
+      return;
+    }
     renderAdminPanel();
     rerenderBoard();
   });
   adminRoot.querySelectorAll(".user-admin__delete").forEach((btn) => {
     btn.addEventListener("click", () => {
-      removeUserById(btn.dataset.id);
+      removeUser(btn.dataset.id);
       renderAdminPanel();
       rerenderBoard();
     });
@@ -491,10 +508,11 @@ const syncFilterControls = () => {
 };
 
 const rerenderBoard = () => {
-  hydrateTasks();
+  const hydrated = hydrateTasks();
+  const tasks = hydrated?.tasks ?? appState.tasks ?? [];
   closeAllTaskMenus({ preserveTriggerId: true });
-  const tasks = getTasksForCurrentUser();
-  const visibleTasks = applyLens(tasks, lens);
+  const userTasks = getTasksForCurrentUser(tasks);
+  const visibleTasks = applyLens(userTasks, lens);
   const boardRoot = getBoardRoot();
   if (!boardRoot) return;
   const isAdmin = appState.currentUser?.role === "admin";
@@ -508,7 +526,7 @@ const rerenderBoard = () => {
     disableNonBacklog: canMoveFromPrev,
     activeClass,
     disabledClass,
-    fullList: tasks,
+    fullList: userTasks,
   });
   attachColumnHandlers();
   attachDragAndDrop();

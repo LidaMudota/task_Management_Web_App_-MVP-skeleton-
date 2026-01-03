@@ -1,4 +1,4 @@
-import { loadUsers } from "./storage";
+import { listUsers } from "./userRegistry";
 
 const normalizeDate = (value) => {
   if (!value) return new Date().toISOString();
@@ -52,7 +52,7 @@ export const applyLens = (tasks, lens) => {
 };
 
 export const buildOwnerOptions = (currentUser) => {
-  const users = loadUsers();
+  const users = listUsers();
   const options = users.map((user) => ({
     value: user.login,
     label: user.profile?.displayName || user.login,
