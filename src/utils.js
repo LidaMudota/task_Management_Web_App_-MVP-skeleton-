@@ -56,12 +56,16 @@ export const generateTestUser = function (userFactory) {
     },
   ];
 
-  const normalized = defaults.map((preset) => {
-    const existing = existingUsers.find(
-      (user) => user.login.toLowerCase() === preset.login.toLowerCase()
-    );
-    return existing || userFactory(preset);
-  });
+  const normalizedDefaults = defaults
+    .filter(
+      (preset) =>
+        !existingUsers.some(
+          (user) => user.login.toLowerCase() === preset.login.toLowerCase()
+        )
+    )
+    .map((preset) => userFactory(preset));
 
-  setInStorage("users", normalized);
+  if (normalizedDefaults.length) {
+    setInStorage("users", existingUsers.concat(normalizedDefaults));
+  }
 };
