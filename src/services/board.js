@@ -17,6 +17,7 @@ const filtersSelectors = {
   owner: "#task-owner-filter",
   sort: "#task-sort",
 };
+const isAdmin = () => appState.currentUser?.role === "admin";
 
 let lens = defaultLens();
 let filtersBound = false;
@@ -433,13 +434,29 @@ const updateOwnerFilter = () => {
   ownerSelect.value = lens.owner;
 };
 
+const hideOwnerControlsForUser = () => {
+  if (isAdmin()) return;
+  const ownerSelect = document.querySelector(filtersSelectors.owner);
+  const ownerGroup = ownerSelect?.closest(".board-toolbar__group");
+  if (ownerGroup) ownerGroup.remove();
+  const sortSelect = document.querySelector(filtersSelectors.sort);
+  if (sortSelect) {
+    const ownerSortOption = sortSelect.querySelector('option[value="owner"]');
+    if (ownerSortOption) ownerSortOption.remove();
+    if (lens.sort === "owner") {
+      lens = { ...lens, sort: "recent" };
+      sortSelect.value = lens.sort;
+    }
+  }
+};
+
 const bindFilters = () => {
   if (filtersBound) return;
   const queryInput = document.querySelector(filtersSelectors.query);
   const statusSelect = document.querySelector(filtersSelectors.status);
   const ownerSelect = document.querySelector(filtersSelectors.owner);
   const sortSelect = document.querySelector(filtersSelectors.sort);
-  if (!queryInput || !statusSelect || !ownerSelect || !sortSelect) return;
+  if (!queryInput || !statusSelect || !sortSelect) return;
 
   queryInput.addEventListener("input", (event) => {
     lens = { ...lens, query: event.target.value.trim() };
@@ -449,10 +466,12 @@ const bindFilters = () => {
     lens = { ...lens, status: event.target.value };
     rerenderBoard();
   });
-  ownerSelect.addEventListener("change", (event) => {
-    lens = { ...lens, owner: event.target.value };
-    rerenderBoard();
-  });
+  if (ownerSelect) {
+    ownerSelect.addEventListener("change", (event) => {
+      lens = { ...lens, owner: event.target.value };
+      rerenderBoard();
+    });
+  }
   sortSelect.addEventListener("change", (event) => {
     lens = { ...lens, sort: event.target.value };
     rerenderBoard();
@@ -513,6 +532,7 @@ export const buildBoard = () => {
   hydrateTasks();
   lens = defaultLens();
   filtersBound = false;
+  hideOwnerControlsForUser();
   updateOwnerFilter();
   bindFilters();
   rerenderBoard();
