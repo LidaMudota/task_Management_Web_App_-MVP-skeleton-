@@ -2,7 +2,7 @@
 .page-body {
   margin: 0;
   font-family: "Inter", "Segoe UI", sans-serif;
-  background: radial-gradient(140% 140% at 12% 12%, #0a1d34 0%, #081120 28%, #050a18 56%, #050a18 100%);
+  background: radial-gradient(160% 140% at 12% 18%, #0b1627 0%, #050912 42%, #04070e 100%);
   color: #0c1a2b;
   line-height: 1.5;
   min-height: 100vh;
@@ -10,74 +10,75 @@
   overflow-x: hidden;
 }
 
-.depth-stage {
+.aurora-stage {
   position: fixed;
   inset: 0;
+  min-height: 100vh;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  background: linear-gradient(135deg, #050a18 0%, #081428 42%, #0a1c33 100%);
-  isolation: isolate;
+  background: radial-gradient(140% 160% at 20% 20%, #0a1a30 0%, #050912 46%, #04060c 100%);
 }
 
-.depth-stage__canvas {
+.aurora-stage__beam {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 18px 32px rgba(8, 18, 37, 0.5));
-  mix-blend-mode: screen;
-  opacity: 0.88;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.depth-stage__glow {
-  position: absolute;
-  width: 780px;
-  height: 780px;
-  border-radius: 50%;
+  width: 68vw;
+  height: 68vw;
   filter: blur(150px);
-  opacity: 0.5;
-  transform: translateZ(0);
-  z-index: 1;
-  pointer-events: none;
+  opacity: 0.6;
+  mix-blend-mode: screen;
+  animation: aurora-shift 32s linear infinite;
+  transform-origin: center;
 }
 
-.depth-stage__glow--left {
-  top: -220px;
-  left: -260px;
-  background: radial-gradient(circle at 30% 30%, rgba(27, 120, 226, 0.46), transparent 72%);
+.aurora-stage__beam--one {
+  top: -22%;
+  left: -18%;
+  background: radial-gradient(closest-side at 30% 30%, rgba(93, 164, 255, 0.65), transparent 64%);
 }
 
-.depth-stage__glow--right {
-  bottom: -260px;
-  right: -320px;
-  background: radial-gradient(circle at 70% 70%, rgba(20, 184, 166, 0.4), transparent 74%);
+.aurora-stage__beam--two {
+  bottom: -26%;
+  right: -14%;
+  background: radial-gradient(closest-side at 70% 70%, rgba(86, 244, 200, 0.55), transparent 66%);
+  animation-delay: -8s;
 }
 
-.depth-stage__veil {
+.aurora-stage__beam--three {
+  top: 18%;
+  right: -12%;
+  background: radial-gradient(closest-side at 50% 50%, rgba(169, 141, 255, 0.45), transparent 62%);
+  animation-delay: -16s;
+}
+
+.aurora-stage__veil {
   position: absolute;
-  inset: -6%;
-  background: radial-gradient(120% 120% at 18% 18%, rgba(36, 117, 224, 0.24), transparent 52%),
-    radial-gradient(110% 110% at 82% 16%, rgba(22, 175, 161, 0.2), transparent 54%),
-    radial-gradient(130% 100% at 50% 80%, rgba(26, 90, 160, 0.2), transparent 60%),
-    linear-gradient(140deg, rgba(5, 11, 24, 0.88), rgba(7, 14, 30, 0.76));
+  inset: -10%;
+  background: radial-gradient(120% 120% at 20% 18%, rgba(15, 35, 71, 0.35), transparent 48%),
+    radial-gradient(100% 100% at 76% 12%, rgba(17, 80, 79, 0.32), transparent 54%),
+    linear-gradient(140deg, rgba(5, 10, 18, 0.92), rgba(7, 14, 29, 0.82));
+  backdrop-filter: blur(14px) saturate(140%);
   mix-blend-mode: soft-light;
-  opacity: 0.94;
-  backdrop-filter: blur(12px) saturate(140%);
-  z-index: 3;
-  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes aurora-shift {
+  0% {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(12%, 10%, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-4%, 12%, 0) scale(1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .depth-stage__canvas {
-    display: none;
-  }
-
-  .depth-stage__glow {
+  .aurora-stage__beam {
+    animation: none;
     filter: blur(120px);
-    opacity: 0.28;
+    opacity: 0.42;
   }
 }
 
